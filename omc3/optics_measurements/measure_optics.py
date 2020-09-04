@@ -46,6 +46,12 @@ def measure_optics(input_files, measure_input):
         os.path.join(measure_input.outputdir, LOG_FILE)))
     tune_dict = tune.calculate(measure_input, input_files)
     common_header = _get_header(measure_input, tune_dict)
+    if measure_input.three_d_excitation:
+        for plane in PLANES:
+            chromas, chroma_errors = chromatic.chromas(measure_input, input_files, tune_dict, plane, sign=1)
+            chromas, chroma_errors = chromatic.chromas(measure_input, input_files, tune_dict, plane, sign=-1)
+            input_files[plane] = chromatic.append_chromas(input_files[plane], chromas, chroma_errors, plane)
+    return
     invariants = {}
     for plane in PLANES:
         phase_dict, out_dfs = phase.calculate(measure_input, input_files, tune_dict, plane)
@@ -192,10 +198,10 @@ class InputFiles(dict):
             frames_to_join = [df for df in frames_to_join if df.DPPAMP > 0]
         if len(frames_to_join) == 0:
             raise ValueError(f"No data found for non-zero |dp/p|")
-        joined_frame = pd.DataFrame(frames_to_join[0]).loc[:, columns]
+        joined_frame = pd.DataFrame(frames_to_join[0]).loc[:, columns]  # .reindex(columns=columns, fill_value=np.nan)
         if len(frames_to_join) > 1:
             for i, df in enumerate(frames_to_join[1:]):
-                joined_frame = pd.merge(joined_frame, df.loc[:, columns], how=how, left_index=True,
+                joined_frame = pd.merge(joined_frame, df.loc[:, columns], how=how, left_index=True, # .reindex(columns=columns, fill_value=np.nan)
                                         right_index=True, suffixes=('', '__' + str(i + 1)))
         for column in columns:
             joined_frame.rename(columns={column: column + '__0'}, inplace=True)

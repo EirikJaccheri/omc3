@@ -108,6 +108,10 @@ def _get_column_mapping(plane):
         (f"{ERR}{TUNE}{plane}",     f"{TUNE}{plane_number}{RMS}"),
         (f"{NAT_TUNE}{plane}",      f"{NAT_TUNE}{plane_number}"),
         (f"{ERR}{NAT_TUNE}{plane}", f"{NAT_TUNE}{plane_number}{RMS}"),
+        (f"{TUNE}Z",                f"{TUNE}3"),
+        (f"{ERR}{TUNE}Z",           f"{TUNE}3{RMS}"),
+        (f"D{TUNE}{plane}",         f"D{TUNE}{plane_number}"),
+        (f"{ERR}D{TUNE}{plane}",    f"D{TUNE}{plane_number}{RMS}"),
     ])
     calc_columns = [f"{SQRT_ACTION}{plane}", f"{ERR}{SQRT_ACTION}{plane}",
                     f"{ACTION}{plane}", f"{ERR}{ACTION}{plane}"]
