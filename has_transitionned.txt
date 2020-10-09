@@ -2,11 +2,11 @@ TRANSITIONED:
 - bin
 - definitions
 - model
+- harpy
 
 - high-level scripts
 
 NOT TRANSITIONED:
-- harpy
 - kmod
 - optics_measurements
 - plotting

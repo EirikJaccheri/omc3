@@ -7,7 +7,7 @@ Handles the cleaning, frequency analysis and resonance search for a single-bunch
 """
 from collections import OrderedDict
 from pathlib import Path
-from os.path import join, basename
+
 import numpy as np
 import pandas as pd
 import tfs
@@ -162,8 +162,8 @@ def _compute_headers(panda, date):
     return headers
 
 
-def _write_bad_bpms(output_path_without_suffix, plane, bad_bpms_with_reasons):
-    with open(f"{output_path_without_suffix}.bad_bpms_{plane.lower()}", 'w') as bad_bpms_file:
+def _write_bad_bpms(output_path_without_suffix, plane, bad_bpms_with_reasons) -> None:
+    with Path(f"{output_path_without_suffix}.bad_bpms_{plane.lower()}").open('w') as bad_bpms_file:
         for line in bad_bpms_with_reasons:
             bad_bpms_file.write(f"{line}\n")
 
@@ -178,10 +178,8 @@ def _write_lin_tfs(output_path_without_suffix, plane, lin_frame):
 
 
 def _get_output_path_without_suffix(output_dir, file_path):
-    return join(output_dir, basename(file_path))
+    return str(output_dir) + "/" + (Path(output_dir) / file_path).name
 
-def _ddget_output_path_without_suffix(output_dir, file_path) -> str:
-    return (Path(output_dir) / file_path).name
 
 def _rescale_amps_to_main_line_and_compute_noise(panda, plane):
     """
