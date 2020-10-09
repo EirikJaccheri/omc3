@@ -145,12 +145,10 @@ def _madx_input_wrapper(content, file_path=None):
         fd, file_path = mkstemp(suffix=".madx", prefix="job.", text=True)
         os.close(fd)  # close file descriptor
         if content:
-            with Path(file_path).open("w") as f:
-                f.write(content)
+            Path(file_path).write_text(content)
     else:
         temp_file = False
-        with Path(file_path).open("w") as f:
-            f.write(content)
+        Path(file_path).write_text(content)
     try:
         yield file_path
     finally:
@@ -166,7 +164,8 @@ def _raise_madx_error(log=None, file=None):
     message = "MADX run failed."
     if log is not None:
         try:
-            content = Path(log).read_text()
+            with Path(log).open("r") as f:
+                content = f.readlines()
             if content[-1].startswith("+="):
                 message += f" '{content[-1].replace('+=+=+=', '').strip()}'."
         except (IOError, IndexError):
