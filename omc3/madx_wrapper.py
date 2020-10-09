@@ -13,7 +13,7 @@ import os
 import subprocess
 import sys
 import warnings
-from os.path import abspath, dirname, join, pardir
+from pathlib import Path
 from tempfile import mkstemp
 
 from generic_parser import EntryPointParameters, entrypoint
@@ -22,7 +22,7 @@ from omc3.utils import logging_tools
 
 LOG = logging_tools.get_logger(__name__)
 
-_LOCAL_PATH = join(dirname(__file__), "bin")
+PATH_TO_BIN = Path(__file__).parent / "bin"
 
 if "darwin" in sys.platform:
     _MADX_BIN = "madx-macosx64-gnu"
@@ -31,7 +31,7 @@ elif "win" in sys.platform:
 else:
     _MADX_BIN = "madx-linux64-gnu"
 
-MADX_PATH = abspath(join(_LOCAL_PATH, _MADX_BIN))
+MADX_PATH = (PATH_TO_BIN / _MADX_BIN).absolute()
 warnings.simplefilter('always', DeprecationWarning)
 
 
@@ -146,7 +146,7 @@ def _madx_input_wrapper(content, file_path=None):
         fd, file_path = mkstemp(suffix=".madx", prefix="job.", text=True)
         os.close(fd)  # close file descriptor
         if content:
-            with open(file_path, "w") as f:
+            with Path(file_path).open("w") as f:
                 f.write(content)
     else:
         temp_file = False
@@ -156,7 +156,7 @@ def _madx_input_wrapper(content, file_path=None):
         yield file_path
     finally:
         if temp_file:
-            os.remove(file_path)
+            Path(file_path).unlink()
 
 
 def _raise_madx_error(log=None, file=None):
