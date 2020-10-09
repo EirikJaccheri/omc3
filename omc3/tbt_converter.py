@@ -12,7 +12,8 @@ Top-level script, which converts turn-by-turn files from various formats to LHC 
 """
 from collections import OrderedDict
 from datetime import datetime
-from os.path import basename, join
+from pathlib import Path
+from typing import Union
 
 from generic_parser.entrypoint_parser import (EntryPointParameters, entrypoint,
                                               save_options_to_config)
@@ -77,8 +78,11 @@ def converter_entrypoint(opt):
     if opt.realizations < 1:
         raise ValueError("Number of realizations lower than 1.")
     iotools.create_dirs(opt.outputdir)
-    save_options_to_config(join(opt.outputdir, DEFAULT_CONFIG_FILENAME.format(
-        time=datetime.utcnow().strftime(formats.TIME))), OrderedDict(sorted(opt.items())))
+    save_options_to_config(
+        Path(opt.outputdir)
+        / DEFAULT_CONFIG_FILENAME.format(time=datetime.utcnow().strftime(formats.TIME)),
+        OrderedDict(sorted(opt.items())),
+    )
     _read_and_write_files(opt)
 
 
@@ -90,15 +94,17 @@ def _read_and_write_files(opt):
         for i in range(opt.realizations):
             suffix = f"_r{i}" if opt.realizations > 1 else ""
             if opt.noise_levels is None:
-                tbt.write(join(opt.outputdir, f"{_file_name(input_file)}{suffix}"), tbt_data=tbt_data)
+                tbt.write(Path(opt.outputdir) / f"{_file_name(input_file)}{suffix}",
+                          tbt_data=tbt_data)
             else:
                 for noise_level in opt.noise_levels:
-                    tbt.write(join(opt.outputdir, f"{_file_name(input_file)}_n{noise_level}{suffix}"),
+                    tbt.write(Path(opt.outputdir) / f"{_file_name(input_file)}_n{noise_level}{suffix}",
                               tbt_data=tbt_data, noise=float(noise_level))
 
 
-def _file_name(filename: str):
-    return basename(filename)[:-5] if filename.endswith(".sdds") else basename(filename)
+def _file_name(file_path: Union[Path, str]) -> str:
+    file_path = Path(file_path)
+    return file_path.stem if file_path.suffix == ".sdds" else file_path.name
 
 
 if __name__ == "__main__":
