@@ -20,11 +20,10 @@ Stages represented by different files:
 To run either of the two or both steps, use options:
                           --harpy                     --optics
 """
-import os
 from collections import OrderedDict
 from copy import deepcopy
 from datetime import datetime
-from os.path import abspath, basename, dirname, join
+from pathlib import Path
 
 from generic_parser.entrypoint_parser import (EntryPoint, EntryPointParameters,
                                               add_to_arguments, entrypoint,
@@ -277,10 +276,10 @@ def _get_suboptions(opt, rest):
             rest = add_to_arguments(rest, entry_params=optics_params(),
                                     files=harpy_opt.files,
                                     outputdir=harpy_opt.outputdir)
-            harpy_opt.outputdir = join(harpy_opt.outputdir, 'lin_files')
+            harpy_opt.outputdir = Path(harpy_opt.outputdir) / 'lin_files'
             if harpy_opt.model is not None:
                 rest = add_to_arguments(rest, entry_params={"model_dir": {"flags": "--model_dir"}},
-                                        model_dir=dirname(abspath(harpy_opt.model)))
+                                        model_dir=Path(harpy_opt.model).parent.absolute())
     else:
         harpy_opt = None
 
@@ -311,11 +310,11 @@ def _write_config_file(harpy_opt, optics_opt, accelerator_opt):
         all_opt.update(optics_opt)
         all_opt.update(sorted(accelerator_opt.items()))
 
-    out_dir = all_opt["outputdir"]
+    out_dir = Path(all_opt["outputdir"])
     file_name = DEFAULT_CONFIG_FILENAME.format(time=datetime.utcnow().strftime(formats.TIME))
     iotools.create_dirs(out_dir)
 
-    save_options_to_config(os.path.join(out_dir, file_name), all_opt)
+    save_options_to_config(out_dir / file_name, all_opt)
 
 
 def _run_harpy(harpy_options):
@@ -345,8 +344,8 @@ def _multibunch(tbt_datas, options):
         return
     for index in range(tbt_datas.nbunches):
         new_options = deepcopy(options)
-        new_file_name = f"bunchid{tbt_datas.bunch_ids[index]}_{basename(new_options.files)}"
-        new_options.files = join(dirname(options.files), new_file_name)
+        new_file_name = f"bunchid{tbt_datas.bunch_ids[index]}_{Path(new_options.files).name}"
+        new_options.files = Path(options.files).parent / new_file_name
         yield tbt.TbtData([tbt_datas.matrices[index]], tbt_datas.date,
                           [tbt_datas.bunch_ids[index]], tbt_datas.nturns), new_options
 
