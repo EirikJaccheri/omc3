@@ -3,14 +3,15 @@ PS
 -------------------
 """
 import logging
-import os
+from pathlib import Path
 
 from generic_parser import EntryPoint
 
 from omc3.model.accelerators.accelerator import Accelerator
 from omc3.model.constants import PLANE_TO_HV
+
 LOGGER = logging.getLogger(__name__)
-CURRENT_DIR = os.path.dirname(__file__)
+CURRENT_DIR: Path = Path(__file__).parent
 
 
 class Ps(Accelerator):
@@ -29,12 +30,12 @@ class Ps(Accelerator):
         pass
 
     @classmethod
-    def get_dir(cls):
-        return os.path.join(CURRENT_DIR, cls.NAME, str(cls.YEAR))
+    def get_dir(cls) -> Path:
+        return CURRENT_DIR / cls.NAME / str(cls.YEAR)
 
     @classmethod
-    def get_file(cls, filename):
-        return os.path.join(CURRENT_DIR, cls.NAME, filename)
+    def get_file(cls, filename) -> Path:
+        return CURRENT_DIR / cls.NAME / filename
 
     def get_exciter_bpm(self, plane, bpms):
         if not self.excitation:

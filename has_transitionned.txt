@@ -1,0 +1,16 @@
+TRANSITIONED:
+- bin
+- definitions
+- model
+
+- high-level scripts
+
+NOT TRANSITIONED:
+- harpy
+- kmod
+- optics_measurements
+- plotting
+- scripts
+- tbt
+- tune_analysis
+- utils

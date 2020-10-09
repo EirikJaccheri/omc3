@@ -67,11 +67,12 @@ def copy_content_of_dir(src_dir, dst_dir):
         copy_item(src_item, dst_item)
 
 
-def create_dirs(path_to_dir):
+def create_dirs(path_to_dir) -> None:
     """ Creates all dirs to path_to_dir if not exists. """
-    if not os.path.exists(path_to_dir):
-        os.makedirs(path_to_dir)
-        LOG.debug("Created directory structure: '{}'".format(path_to_dir))
+    path_to_dir = Path(path_to_dir)
+    if not path_to_dir.exists():
+        path_to_dir.mkdir()
+        LOG.debug(f"Created directory structure: '{path_to_dir}'")
 
 
 def copy_item(src_item, dest):

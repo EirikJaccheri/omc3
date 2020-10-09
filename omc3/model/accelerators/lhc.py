@@ -3,8 +3,8 @@ LHC
 -------------------
 """
 import json
-import os
 from collections import OrderedDict
+from pathlib import Path
 
 import tfs
 from generic_parser import EntryPoint
@@ -17,8 +17,9 @@ from omc3.model.constants import (B2_ERRORS_TFS, B2_SETTINGS_MADX,
 from omc3.utils import logging_tools
 
 LOGGER = logging_tools.get_logger(__name__)
-CURRENT_DIR = os.path.dirname(__file__)
-LHC_DIR = os.path.join(CURRENT_DIR, "lhc")
+
+CURRENT_DIR: Path = Path(__file__).parent
+LHC_DIR: Path = CURRENT_DIR / "lhc"
 
 
 class Lhc(Accelerator):
@@ -80,7 +81,7 @@ class Lhc(Accelerator):
         if (self.excitation != AccExcitationMode.FREE) and (self.drv_tunes is None):
             raise AcceleratorDefinitionError("Driven tunes not set.")
 
-        if self.modifiers is not None and not os.path.exists(self.modifiers):
+        if self.modifiers is not None and not Path(self.modifiers).exists():
             raise AcceleratorDefinitionError(f"Optics file '{self.modifiers}' does not exist.")
 
         # print info about the accelerator
@@ -103,18 +104,18 @@ class Lhc(Accelerator):
             raise AcceleratorDefinitionError("Beam parameter has to be one of (1, 2)")
         self._beam = value
 
-    def get_file(self, filename):
-        return os.path.join(CURRENT_DIR, self.NAME, filename)
+    def get_file(self, filename) -> Path:
+        return CURRENT_DIR / self.NAME / filename
 
     @staticmethod
-    def get_lhc_error_dir():
-        return os.path.join(LHC_DIR, "systematic_errors")
+    def get_lhc_error_dir() -> Path:
+        return LHC_DIR / "systematic_errors"
 
     def get_variables(self, frm=None, to=None, classes=None):
-        correctors_dir = os.path.join(LHC_DIR, "2012", "correctors")  # not a bug
+        correctors_dir = LHC_DIR / "2012" / "correctors"  # not a bug
         all_corrs = _merge_jsons(
-            os.path.join(correctors_dir, f"correctors_b{self.beam}", "beta_correctors.json"),
-            os.path.join(correctors_dir, f"correctors_b{self.beam}", "coupling_correctors.json"),
+            correctors_dir / f"correctors_b{self.beam}" / "beta_correctors.json",
+            correctors_dir / f"correctors_b{self.beam}" / "coupling_correctors.json",
             self._get_triplet_correctors_file(),
         )
         my_classes = classes
@@ -182,13 +183,13 @@ class Lhc(Accelerator):
 
     # Private Methods ##########################################################
 
-    def _get_triplet_correctors_file(self):
-        correctors_dir = os.path.join(LHC_DIR, self.correctors_dir, "correctors")
-        return os.path.join(correctors_dir, "triplet_correctors.json")
+    def _get_triplet_correctors_file(self) -> Path:
+        correctors_dir = LHC_DIR / self.correctors_dir / "correctors"
+        return correctors_dir / "triplet_correctors.json"
 
-    def _get_corrector_elems(self):
-        correctors_dir = os.path.join(LHC_DIR, self.correctors_dir, "correctors")
-        return os.path.join(correctors_dir, f"corrector_elems_b{self.beam}.tfs")
+    def _get_corrector_elems(self) -> Path:
+        correctors_dir = LHC_DIR / self.correctors_dir / "correctors"
+        return correctors_dir / f"corrector_elems_b{self.beam}.tfs"
 
     def get_exciter_bpm(self, plane, commonbpms):
         beam = self.beam
@@ -226,14 +227,15 @@ class Lhc(Accelerator):
         elif self.beam == 2:
             return [i in index for i in self.model.loc["BPMSW.33R8.B2":].index]
 
-    def get_base_madx_script(self, outdir, best_knowledge=False):
+    def get_base_madx_script(self, outdir, best_knowledge=False) -> str:
+        outdir = Path(outdir)
         ats_md = False
         high_beta = False
         ats_suffix = '_ats' if self.ats else ''
         madx_script = (
             f"option, -echo;\n"
-            f"{_call_in_madx(os.path.join(outdir, MACROS_DIR, GENERAL_MACROS))}"
-            f"{_call_in_madx(os.path.join(outdir, MACROS_DIR, LHC_MACROS))}"
+            f"{_call_in_madx(outdir / MACROS_DIR / GENERAL_MACROS)}"
+            f"{_call_in_madx(outdir / MACROS_DIR / LHC_MACROS)}"
             f'title, "Model from Lukas :-)";\n'
             f"{self.load_main_seq_madx()}\n"
             f"exec, define_nominal_beams();\n"
@@ -251,9 +253,9 @@ class Lhc(Accelerator):
         if best_knowledge:
             # madx_script += f"exec, load_average_error_table({self.energy}, {self.beam});\n"
             madx_script += (
-                    f"readmytable, file = '{os.path.join(outdir, B2_ERRORS_TFS)}', table=errtab;\n"
+                    f"readmytable, file = '{(outdir / B2_ERRORS_TFS).absolute()}', table=errtab;\n"
                     f"seterr, table=errtab;\n"
-                    f"{_call_in_madx(os.path.join(outdir, B2_SETTINGS_MADX))}")
+                    f"{_call_in_madx(outdir / B2_SETTINGS_MADX)}")
         if high_beta:
             madx_script += "exec, high_beta_matcher();\n"
         madx_script += f"exec, match_tunes{ats_suffix}({self.nat_tunes[0]}, {self.nat_tunes[1]}, {self.beam});\n"
@@ -275,24 +277,24 @@ class Lhc(Accelerator):
 def _get_call_main_for_year(year):
     call_main = _call_in_madx(_get_file_for_year(year, "main.seq"))
     if year == "2012":
-        call_main += _call_in_madx(os.path.join(LHC_DIR, "2012", "install_additional_elements.madx"))
+        call_main += _call_in_madx(LHC_DIR / "2012" / "install_additional_elements.madx")
     if year == "hllhc1.3":
-        call_main += _call_in_madx(os.path.join(LHC_DIR, "hllhc1.3", "main_update.seq"))
+        call_main += _call_in_madx(LHC_DIR / "hllhc1.3" / "main_update.seq")
     return call_main
 
 
 def _call_in_madx(path_to_call):
-    return f"call, file = '{path_to_call}';\n"
+    return f"call, file = '{Path(path_to_call).absolute()}';\n"
 
 
-def _get_file_for_year(year, filename):
-    return os.path.join(LHC_DIR, year, filename)
+def _get_file_for_year(year: int,  filename: str) -> Path:
+    return LHC_DIR / str(year) / filename
 
 
 def _merge_jsons(*files):
     full_dict = {}
     for json_file in files:
-        with open(json_file, "r") as json_data:
+        with Path(json_file).open("r") as json_data:
             json_dict = json.load(json_data)
             for key in json_dict.keys():
                 full_dict[key] = json_dict[key]

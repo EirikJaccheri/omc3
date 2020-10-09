@@ -5,7 +5,7 @@ Accelerator
 Contains parent accelerator class and other support classes
 """
 
-from os.path import isfile, join
+from pathlib import Path
 
 import pandas as pd
 import tfs
@@ -114,29 +114,29 @@ class Accelerator(object):
 
     def init_from_model_dir(self, model_dir):
         LOGGER.debug("Creating accelerator instance from model dir")
-        self.model_dir = model_dir
+        self.model_dir = Path(model_dir)
 
         # Elements #####################################
-        elements_path = join(model_dir, TWISS_ELEMENTS_DAT)
-        if not isfile(elements_path):
+        elements_path = self.model_dir / TWISS_ELEMENTS_DAT
+        if not elements_path.is_file():
             raise AcceleratorDefinitionError("Elements twiss not found")
         self.elements = tfs.read(elements_path, index="NAME")
 
-        LOGGER.debug(f"  model path = {join(model_dir, TWISS_DAT)}")
+        LOGGER.debug(f"  model path = {self.model_dir / TWISS_DAT}")
         try:
-            self.model = tfs.read(join(model_dir, TWISS_DAT), index="NAME")
+            self.model = tfs.read(self.model_dir / TWISS_DAT, index="NAME")
         except IOError:
             bpm_index = [idx for idx in self.elements.index.to_numpy() if idx.startswith(self.BPM_INITIAL)]
             self.model = self.elements.loc[bpm_index, :]
         self.nat_tunes = [float(self.model.headers["Q1"]), float(self.model.headers["Q2"])]
 
         # Excitations #####################################
-        driven_filenames = dict(acd=join(model_dir, TWISS_AC_DAT),
-                                adt=join(model_dir, TWISS_ADT_DAT))
-        if isfile(driven_filenames["acd"]) and isfile(driven_filenames["adt"]):
+        driven_filenames = dict(acd=self.model_dir / TWISS_AC_DAT,
+                                adt=self.model_dir / TWISS_ADT_DAT)
+        if driven_filenames["acd"].is_file() and driven_filenames["adt"].is_file():
             raise AcceleratorDefinitionError("ADT as well as ACD models provided. Choose only one.")
         for key in driven_filenames.keys():
-            if isfile(driven_filenames[key]):
+            if driven_filenames[key].is_file():
                 self._model_driven = tfs.read(driven_filenames[key], index="NAME")
                 self.excitation = DRIVEN_EXCITATIONS[key]
 
@@ -144,18 +144,18 @@ class Accelerator(object):
             self.drv_tunes = [self.model_driven.headers["Q1"], self.model_driven.headers["Q2"]]
 
         # Best Knowledge #####################################
-        best_knowledge_path = join(model_dir, TWISS_BEST_KNOWLEDGE_DAT)
-        if isfile(best_knowledge_path):
+        best_knowledge_path = self.model_dir / TWISS_BEST_KNOWLEDGE_DAT
+        if best_knowledge_path.is_file():
             self.model_best_knowledge = tfs.read(best_knowledge_path, index="NAME")
 
         # Optics File #########################################
-        opticsfilepath = join(self.model_dir, MODIFIERS_MADX)
-        if isfile(opticsfilepath):
+        opticsfilepath = self.model_dir / MODIFIERS_MADX
+        if opticsfilepath.is_file():
             self.modifiers = opticsfilepath
 
         # Error Def #####################################
-        errordefspath = join(self.model_dir, ERROR_DEFFS_TXT)
-        if isfile(errordefspath):
+        errordefspath = self.model_dir / ERROR_DEFFS_TXT
+        if errordefspath.is_file():
             self.error_defs_file = errordefspath
 
     # Class methods ###########################################

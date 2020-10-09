@@ -1,5 +1,5 @@
 import shutil
-from os.path import join, dirname, pardir
+from pathlib import Path
 
 from omc3.model.constants import MACROS_DIR, GENERAL_MACROS
 from omc3.utils import logging_tools
@@ -10,15 +10,16 @@ LOGGER = logging_tools.get_logger(__name__)
 
 class SegmentCreator(object):
     @classmethod
-    def prepare_run(cls, instance, output_path):
-        macros_path = join(output_path, MACROS_DIR)
+    def prepare_run(cls, instance, output_path) -> None:
+        output_path = Path(output_path)
+        macros_path = output_path / MACROS_DIR
         create_dirs(macros_path)
-        lib_path = join(dirname(__file__), pardir, pardir, "lib")
-        shutil.copy(join(lib_path, GENERAL_MACROS), join(macros_path, GENERAL_MACROS))
-
+        lib_path = Path(__file__).parent.parent / "madx_macros"
+        shutil.copy(str(lib_path / GENERAL_MACROS), str(macros_path / GENERAL_MACROS))
 
     @classmethod
-    def get_madx_script(cls, instance, output_path):
+    def get_madx_script(cls, instance, output_path) -> str:
+        output_path = Path(output_path)
         madx_template = read_all_lines_in_textfile(instance.get_file("segment.madx"))
         replace_dict = {
             "MAIN_SEQ": instance.load_main_seq_madx(),  # LHC only
