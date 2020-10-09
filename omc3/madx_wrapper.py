@@ -105,8 +105,7 @@ def _run(full_madx_script, log_file=None, output_file=None, madx_path=MADX_PATH,
 
 
 def _read_input_file(input_file):
-    with open(input_file) as text_file:
-        return text_file.read()
+    return Path(input_file).read_text()
 
 
 def _check_log_and_output_files(output_file, log_file):
@@ -126,7 +125,7 @@ def _logfile_wrapper(file_path=None):
                 LOG.info(line)
         yield log_handler
     else:
-        with open(file_path, "w") as log_file:
+        with Path(file_path).open("w") as log_file:
             def log_handler(line):
                 log_file.write(line)
                 line = line.rstrip()
@@ -150,7 +149,7 @@ def _madx_input_wrapper(content, file_path=None):
                 f.write(content)
     else:
         temp_file = False
-        with open(file_path, "w") as f:
+        with Path(file_path).open("w") as f:
             f.write(content)
     try:
         yield file_path
@@ -167,8 +166,7 @@ def _raise_madx_error(log=None, file=None):
     message = "MADX run failed."
     if log is not None:
         try:
-            with open(log, "r") as f:
-                content = f.readlines()
+            content = Path(log).read_text()
             if content[-1].startswith("+="):
                 message += f" '{content[-1].replace('+=+=+=', '').strip()}'."
         except (IOError, IndexError):
