@@ -67,8 +67,6 @@ linear or quadratic fit from the measurements.
 
 :author: Joschua Dilly
 """
-import os
-from pathlib import Path
 from collections import OrderedDict
 from pathlib import Path
 
