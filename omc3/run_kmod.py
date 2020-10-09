@@ -1,4 +1,4 @@
-from os.path import join
+from pathlib import Path
 
 import numpy as np
 import pandas as pd
@@ -116,7 +116,7 @@ def analyse_kmod(opt):
     opt['label'] = f'{opt.interaction_point}{opt.beam}' if opt.interaction_point is not None else f'{opt.magnets[0]}-{opt.magnets[1]}'
     opt['instruments'] = list(map(str.upper, opt.instruments.split(",")))
 
-    output_dir = join(opt.outputdir, opt.label)
+    output_dir: Path = Path(opt.outputdir) / opt.label
     iotools.create_dirs(output_dir)
 
     LOG.info('Get inputfiles')
@@ -128,16 +128,16 @@ def analyse_kmod(opt):
 
     LOG.info('Plot tunes and fit')
     if opt.no_plots:
-        helper.plot_cleaned_data([magnet1_df, magnet2_df], join(output_dir, FIT_PLOTS_NAME), interactive_plot=False)
+        helper.plot_cleaned_data([magnet1_df, magnet2_df], (output_dir / FIT_PLOTS_NAME).absolute(), interactive_plot=False)
 
     LOG.info('Write magnet dataframes and results')
     for magnet_df in [magnet1_df, magnet2_df]:
-        tfs.write(join(output_dir, f"{magnet_df.headers['QUADRUPOLE']}{EXT}"), magnet_df)
+        tfs.write(output_dir / f"{magnet_df.headers['QUADRUPOLE']}{EXT}", magnet_df)
 
-    tfs.write(join(output_dir, f'{RESULTS_FILE_NAME}{EXT}'), results_df)
+    tfs.write(output_dir / f'{RESULTS_FILE_NAME}{EXT}', results_df)
 
     if opt.instruments_found:
-        tfs.write(join(output_dir, f'{INSTRUMENTS_FILE_NAME}{EXT}'), instrument_beta_df)
+        tfs.write(output_dir / f'{INSTRUMENTS_FILE_NAME}{EXT}', instrument_beta_df)
 
     create_lsa_results_file(betastar_required, opt.instruments_found, results_df, instrument_beta_df, output_dir)
 
@@ -151,7 +151,7 @@ def create_lsa_results_file(betastar_required, instruments_found, results_df, in
         lsa_results_df = lsa_results_df.append(instrument_beta_df, sort=False, ignore_index=True)
 
     if not lsa_results_df.empty:
-        tfs.write(join(output_dir, f'{LSA_FILE_NAME}{EXT}'), lsa_results_df)
+        tfs.write(output_dir / f'{LSA_FILE_NAME}{EXT}', lsa_results_df)
 
 
 def convert_betastar_and_waist(bs):
@@ -169,7 +169,7 @@ def check_default_error(options, error):
 
 
 def find_magnet(beam, circuit):
-    sequence = tfs.read(join(SEQUENCES_PATH, f"twiss_lhc{beam.lower()}.dat"))
+    sequence = tfs.read(SEQUENCES_PATH / f"twiss_lhc{beam.lower()}.dat")
     circuit = circuit.split('.')
     magnetname = sequence[sequence['NAME'].str.contains(r'MQ\w+\.{:s}{:s}{:s}\.\w+'.format(circuit[0][-1], circuit[1][0], circuit[1][1]))]['NAME'].values[0]
     return magnetname
@@ -178,7 +178,7 @@ def find_magnet(beam, circuit):
 def define_params(options, magnet1_df, magnet2_df):
     LOG.debug(' adding additional parameters to header ')
     beta_star_required = False
-    sequence = tfs.read(join(SEQUENCES_PATH, f"twiss_lhc{options.beam.lower()}.dat"), index='NAME')
+    sequence = tfs.read(SEQUENCES_PATH / f"twiss_lhc{options.beam.lower()}.dat", index='NAME')
 
     for magnet_df in [magnet1_df, magnet2_df]:
         magnet_df.headers['LENGTH'] = sequence.loc[magnet_df.headers['QUADRUPOLE'], 'L']
