@@ -68,6 +68,7 @@ linear or quadratic fit from the measurements.
 :author: Joschua Dilly
 """
 import os
+from pathlib import Path
 from collections import OrderedDict
 from pathlib import Path
 
@@ -353,10 +354,11 @@ def _get_timber_keys_and_bbq_columns(beam):
 
 def _save_options(opt):
     if opt.output:
-        os.makedirs(opt.output, exist_ok=True)
-        save_options_to_config(os.path.join(opt.output, formats.get_config_filename(__file__)),
-                               OrderedDict(sorted(opt.items()))
-                               )
+        Path(opt.output).mkdir(parents=True, exist_ok=True)
+        save_options_to_config(
+            Path(opt.output) / formats.get_config_filename(__file__),
+            OrderedDict(sorted(opt.items()))
+        )
 
 
 # Script Mode ##################################################################
