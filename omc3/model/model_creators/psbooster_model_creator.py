@@ -49,8 +49,7 @@ class PsboosterModelCreator(object):
             "OUTPUT": output_path,
         }
 
-        with (output_path / JOB_ITERATE_MADX).open("w") as textfile:
-            textfile.write(iterate_template % replace_dict)
+        (output_path / JOB_ITERATE_MADX).write_text(iterate_template % replace_dict)
 
     @classmethod
     def _prepare_corrtest(cls, instance, output_path) -> None:
@@ -72,8 +71,7 @@ class PsboosterModelCreator(object):
             "COR": "%COR"  # field filled later by Java GUI
         }
 
-        with (output_path / "correction_test.mask2.madx").open("w") as textfile:
-            textfile.write(template % replace_dict)
+        (output_path / "correction_test.mask2.madx").write_text(template % replace_dict)
 
     @classmethod
     def prepare_run(cls, instance, output_path) -> None:

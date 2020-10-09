@@ -88,8 +88,7 @@ class LhcModelCreator(object):
         output_path = Path(output_path)
         madx_script = lhc_instance.get_base_madx_script(output_path)
         madx_script += f"exec, select_monitors();\ncall, file = '{output_path / 'iter.madx'}';\n"
-        with (output_path / JOB_ITERATE_MADX).open("w") as textfile:
-            textfile.write(madx_script)
+        (output_path / JOB_ITERATE_MADX).write_text(madx_script)
 
 
 class LhcBestKnowledgeCreator(LhcModelCreator):

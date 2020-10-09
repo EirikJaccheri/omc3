@@ -6,8 +6,8 @@ Handles the cleaning, frequency analysis and resonance search for a single-bunch
 
 """
 from collections import OrderedDict
-from os.path import basename, join
-
+from pathlib import Path
+from os.path import join, basename
 import numpy as np
 import pandas as pd
 import tfs
@@ -15,9 +15,8 @@ import tfs
 from omc3.definitions import formats
 from omc3.definitions.constants import PLANES, PLANE_TO_NUM as P2N
 from omc3.harpy import clean, frequency, kicker
-from omc3.harpy.constants import (FILE_AMPS_EXT, FILE_FREQS_EXT, FILE_LIN_EXT,
-                                  COL_NAME, COL_TUNE, COL_AMP, COL_MU,
-                                  COL_NATTUNE, COL_NATAMP, COL_PHASE, COL_ERR)
+from omc3.harpy.constants import (COL_AMP, COL_ERR, COL_MU, COL_NAME, COL_NATAMP, COL_NATTUNE,
+                                  COL_PHASE, COL_TUNE, FILE_AMPS_EXT, FILE_FREQS_EXT, FILE_LIN_EXT)
 from omc3.utils import logging_tools
 from omc3.utils.contexts import timeit
 
@@ -181,6 +180,8 @@ def _write_lin_tfs(output_path_without_suffix, plane, lin_frame):
 def _get_output_path_without_suffix(output_dir, file_path):
     return join(output_dir, basename(file_path))
 
+def _ddget_output_path_without_suffix(output_dir, file_path) -> str:
+    return (Path(output_dir) / file_path).name
 
 def _rescale_amps_to_main_line_and_compute_noise(panda, plane):
     """

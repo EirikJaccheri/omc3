@@ -53,8 +53,7 @@ class PsModelCreator(object):
             "DRV_TUNE_Y": "",
         }
 
-        with (output_path / JOB_ITERATE_MADX).open("w") as textfile:
-            textfile.write(iterate_template % replace_dict)
+        (output_path / JOB_ITERATE_MADX).write_text(iterate_template % replace_dict)
 
     @classmethod
     def prepare_run(cls, instance, output_path) -> None:
