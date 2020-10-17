@@ -52,13 +52,15 @@ def test_remove_dominant_elements_only_max(u_mat, s_mat):
 
 
 @pytest.fixture
-def u_mat():
-    return np.sqrt(np.array([[0.97, 0.01, 0.01, 0.01],
-                             [0.01, 0.65, 0.2,  0.14],
-                             [0.01, 0.25, 0.29, 0.45],
-                             [0.01, 0.09, 0.5,  0.4]]))
+def u_mat() -> np.ndarray:
+    return np.sqrt(
+        np.array([[0.97, 0.01, 0.01, 0.01],
+                 [0.01, 0.65, 0.2,  0.14],
+                 [0.01, 0.25, 0.29, 0.45],
+                 [0.01, 0.09, 0.5,  0.4]])
+    )
 
 
 @pytest.fixture
-def s_mat():
+def s_mat() -> np.ndarray:
     return np.array([10, 4, 3, 1])
