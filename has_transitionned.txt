@@ -8,9 +8,9 @@ TRANSITIONED:
 - scripts
 - tbt
 - tune_analysis
+- utils
 
 - high-level scripts
 
 NOT TRANSITIONED:
 - plotting
-- utils

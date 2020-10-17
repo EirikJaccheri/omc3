@@ -11,6 +11,7 @@ import datetime
 import inspect
 import logging
 import os
+from pathlib import Path
 import sys
 import time
 import warnings
@@ -44,7 +45,7 @@ FATAL = logging.FATAL
 # Classes and Contexts #########################################################
 
 
-class MaxFilter(object):
+class MaxFilter:
     """ To get messages only up to a certain level """
     def __init__(self, level):
         self.__level = level
@@ -53,7 +54,7 @@ class MaxFilter(object):
         return log_record.levelno <= self.__level
 
 
-class DebugMode(object):
+class DebugMode:
     """ Context Manager for the debug mode.
 
     Hint: Does not work with @contextmanager from contextlib (even though nicer code),
@@ -70,7 +71,7 @@ class DebugMode(object):
             caller_file = _get_caller()
             current_module = _get_current_module(caller_file)
 
-            self.logger = logging.getLogger(".".join([current_module, os.path.basename(caller_file)]))
+            self.logger = logging.getLogger(".".join([current_module, Path(caller_file).name]))
 
             # set level to debug
             self.current_level = self.logger.getEffectiveLevel()
@@ -103,7 +104,7 @@ class DebugMode(object):
             # summarize
             time_used = time.time() - self.start_time
             log_id = "" if self.log_file is None else "'{:s}'".format(
-                os.path.basename(self.log_file))
+                Path(self.log_file).name)
             self.logger.debug("Exiting Debug-Mode {:s} after {:f}s.".format(log_id, time_used))
 
             # revert everything
@@ -334,15 +335,15 @@ def get_my_logger_name():
 # Private Methods ##############################################################
 
 
-def _get_caller():
+def _get_caller() -> str:
     """ Find the caller of the current log-function """
-    this_file, _ = os.path.splitext(__file__)
+    this_file: str = Path(__file__).stem
     caller_file = this_file
     caller_frame = inspect.currentframe()
     while this_file == caller_file:
         caller_frame = caller_frame.f_back
         (caller_file_full, _, _, _, _) = inspect.getframeinfo(caller_frame)
-        caller_file, _ = os.path.splitext(caller_file_full)
+        caller_file: str = Path(caller_file_full).stem
     return caller_file
 
 
@@ -353,8 +354,9 @@ def _get_current_module(current_file=None):
     path_parts = os.path.abspath(current_file).split(os.path.sep)
 
     repo_parts = os.path.abspath(
-                    os.path.join(os.path.dirname(os.path.abspath(__file__)), os.path.pardir)
-                    ).split(os.path.sep)
+        os.path.join(
+            os.path.dirname(os.path.abspath(__file__)), os.path.pardir)
+    ).split(os.path.sep)
 
     current_module = '.'.join(path_parts[len(repo_parts):-1])
     return current_module
@@ -364,7 +366,7 @@ def _get_caller_logger_name():
     """ Returns logger name of the caller. """
     caller_file = _get_caller()
     current_module = _get_current_module(caller_file)
-    return ".".join([current_module, os.path.basename(caller_file)])
+    return ".".join([current_module, Path(caller_file).name])
 
 
 def _bring_color(format_string, colorlevel=INFO):
