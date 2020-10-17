@@ -1,5 +1,6 @@
 import datetime
-from os.path import join
+from pathlib import Path
+from typing import List, Tuple, Union
 
 import numpy as np
 import tfs
@@ -8,13 +9,13 @@ from matplotlib import pyplot as plt
 from omc3.definitions import formats
 from omc3.definitions.constants import PLANES
 from omc3.kmod import analysis
-from omc3.kmod.constants import SIDES, ERR, TUNE, EXT, CLEANED, K, AVERAGE, BETA
+from omc3.kmod.constants import AVERAGE, BETA, CLEANED, ERR, EXT, K, SIDES, TUNE
 from omc3.utils import logging_tools, outliers
 
 LOG = logging_tools.get_logger(__name__)
 
 
-def clean_data(magnet_df, no_autoclean):
+def clean_data(magnet_df: tfs.TfsDataFrame, no_autoclean) -> tfs.TfsDataFrame:
     if no_autoclean:
         LOG.info('Manual cleaning is not yet implemented, no cleaning was performed')
         for plane in PLANES:
@@ -27,7 +28,7 @@ def clean_data(magnet_df, no_autoclean):
     return magnet_df
 
 
-def add_tune_uncertainty(magnet_df, tune_uncertainty):
+def add_tune_uncertainty(magnet_df: tfs.TfsDataFrame, tune_uncertainty) -> tfs.TfsDataFrame:
     LOG.debug(f'adding {tune_uncertainty} units tune measurement uncertainty')
     for plane in PLANES:
         magnet_df[f"{ERR}{TUNE}{plane}"] = np.sqrt(magnet_df[f"{ERR}{TUNE}{plane}"]**2 + tune_uncertainty**2)
@@ -36,13 +37,13 @@ def add_tune_uncertainty(magnet_df, tune_uncertainty):
 # ##########################   FILE LOADING    ##########################################
 
 
-def get_input_data(opt):
+def get_input_data(opt) -> Tuple[tfs.TfsDataFrame, tfs.TfsDataFrame]:
     return get_simulation_files(opt.working_directory, opt.beam, opt.magnets) if opt.simulation else merge_data(opt)
 
 
-def get_simulation_files(working_directory, beam, magnets):
-    magnet1_df = tfs.read(join(working_directory, f"{magnets[0]}.{beam}{EXT}"))
-    magnet2_df = tfs.read(join(working_directory, f"{magnets[1]}.{beam}{EXT}"))
+def get_simulation_files(working_directory: Union[Path, str], beam, magnets) -> Tuple[tfs.TfsDataFrame, tfs.TfsDataFrame]:
+    magnet1_df = tfs.read(Path(working_directory) / f"{magnets[0]}.{beam}{EXT}")
+    magnet2_df = tfs.read(Path(working_directory) / f"{magnets[1]}.{beam}{EXT}")
     magnet1_df.headers['QUADRUPOLE'] = magnet1_df.headers['NAME']
     magnet2_df.headers['QUADRUPOLE'] = magnet2_df.headers['NAME']
     return magnet1_df, magnet2_df
@@ -66,29 +67,29 @@ def merge_data(kmod_input_params):
     return magnet_df
 
 
-def return_ip_filename(working_directory, ip, beam):
+def return_ip_filename(working_directory, ip, beam) -> List[List[Path]]:
     LOG.debug('Setting IP trim file names')
     all_filepaths = []
     for side in SIDES:
-        path_tunex = join(working_directory, f"{ip.lower()}{beam.lower()}{side}X{EXT}")
-        path_tuney = join(working_directory, f"{ip.lower()}{beam.lower()}{side}Y{EXT}")
-        path_k = join(working_directory, f"{ip.lower()}{side}K{EXT}")
+        path_tunex = Path(working_directory) / f"{ip.lower()}{beam.lower()}{side}X{EXT}"
+        path_tuney = Path(working_directory) / f"{ip.lower()}{beam.lower()}{side}Y{EXT}"
+        path_k = Path(working_directory) / f"{ip.lower()}{side}K{EXT}"
         all_filepaths.append([path_tunex, path_tuney, path_k])
     return all_filepaths
 
 
-def return_circuit_filename(working_directory, circuits_1_and_2, beam):
+def return_circuit_filename(working_directory, circuits_1_and_2, beam) -> List[List[Path]]:
     LOG.debug('Setting Circuit trim file names')
     all_filepaths = []
     for circuit in circuits_1_and_2:
-        path_tunex = join(working_directory, f"{circuit}_tune_x_{beam.lower()}{EXT}")
-        path_tuney = join(working_directory, f"{circuit}_tune_y_{beam.lower()}{EXT}")
-        path_k = join(working_directory, f"{circuit}_k{EXT}")
+        path_tunex = Path(working_directory) / f"{circuit}_tune_x_{beam.lower()}{EXT}"
+        path_tuney = Path(working_directory) / f"{circuit}_tune_y_{beam.lower()}{EXT}"
+        path_k = Path(working_directory) / f"{circuit}_k{EXT}"
         all_filepaths.append([path_tunex, path_tuney, path_k])
     return all_filepaths
 
 
-def bin_tunes_and_k(tune_dfs, k_df, magnet):
+def bin_tunes_and_k(tune_dfs, k_df, magnet) -> tfs.TfsDataFrame:
     # create bins, centered around each time step in k with width eq half distance to the next timestep
     bins = np.append((k_df['TIME']-k_df.diff()['TIME']/2.).fillna(value=0).values, k_df['TIME'].iloc[-1])
     magnet_df = k_df.loc[:, ['K']]
@@ -98,14 +99,14 @@ def bin_tunes_and_k(tune_dfs, k_df, magnet):
     return tfs.TfsDataFrame(magnet_df, headers=headers_for_df(magnet, k_df))
 
 
-def return_mean_of_binned_data(bins, tune_df):
+def return_mean_of_binned_data(bins, tune_df) -> Tuple[float, float]:
     digitize = np.digitize(tune_df['TIME'], bins)
     mean = [tune_df['TUNE'][digitize == i].mean() for i in range(1, len(bins))]
     std = np.nan_to_num([tune_df['TUNE'][digitize == i].std() for i in range(1, len(bins))])
     return mean, std
 
 
-def headers_for_df(magnet, k_df):
+def headers_for_df(magnet, k_df) -> dict:
     LOG.debug('Creating headers for DF')
     head = {}
     head['QUADRUPOLE'] = magnet

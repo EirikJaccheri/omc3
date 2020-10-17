@@ -1,5 +1,5 @@
 import datetime
-import os
+from pathlib import Path
 
 import numpy as np
 import scipy.optimize
@@ -279,13 +279,12 @@ def get_BPM(kmod_input_params):
 
 
 def get_BPM_distance(kmod_input_params,BPML,BPMR):
-    twiss_df = tfs.read(os.path.join(SEQUENCES_PATH,
-                                     f"twiss_lhc{kmod_input_params.beam.lower()}.dat"), index='NAME')
+    twiss_df = tfs.read(SEQUENCES_PATH / f"twiss_lhc{kmod_input_params.beam.lower()}.dat", index='NAME')
     return np.abs(twiss_df.loc[BPMR, 'S'] - twiss_df.loc[BPML, 'S']) / 2
 
 
 def get_phase_from_model(kmod_input_params,plane):        # get phase from twiss model
-    twiss_df = tfs.read(os.path.join(f'{kmod_input_params.model_dir}', TWISS_DAT), index='NAME')
+    twiss_df = tfs.read(Path(f'{kmod_input_params.model_dir}') / TWISS_DAT, index='NAME')
     BPML, BPMR = get_BPM(kmod_input_params)[0], get_BPM(kmod_input_params)[1]
     phase_adv_model = abs(twiss_df.loc[BPMR, f'MU{plane}'] - twiss_df.loc[BPML, f'MU{plane}'])
     phase_adv_err = 0.5e-3  # this number is given by Andrea's estimations
@@ -294,8 +293,7 @@ def get_phase_from_model(kmod_input_params,plane):        # get phase from twiss
 
 
 def get_phase_from_measurement(kmod_input_params,plane):
-    phase_df = tfs.read(os.path.join(f'{kmod_input_params.measurement_dir}',
-                                     f'{PHASE_NAME}{plane.lower()}{EXT}'), index='NAME')
+    phase_df = tfs.read(Path(f'{kmod_input_params.measurement_dir}') / f'{PHASE_NAME}{plane.lower()}{EXT}', index='NAME')
     bpms_lr = get_BPM(kmod_input_params)
     for bpm in bpms_lr:
         if bpm not in phase_df.index.to_numpy():

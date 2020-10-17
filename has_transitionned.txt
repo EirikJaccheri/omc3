@@ -3,11 +3,11 @@ TRANSITIONED:
 - definitions
 - model
 - harpy
+- kmod
 
 - high-level scripts
 
 NOT TRANSITIONED:
-- kmod
 - optics_measurements
 - plotting
 - scripts
