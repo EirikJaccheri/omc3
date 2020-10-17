@@ -8,7 +8,7 @@ Functions to add data to or extract data from kick_ac files.
 :author: jdilly
 
 """
-import os
+from pathlib import Path
 
 import numpy as np
 import pandas as pd
@@ -235,7 +235,7 @@ def write_timed_dataframe(path, df):
 
 def read_two_kick_files_from_folder(folder):
     return merge_two_plane_kick_dfs(
-        *[read_timed_dataframe(os.path.join(folder, f'{KICK_NAME}{p.lower()}.tfs')) for p in PLANES]
+        *[read_timed_dataframe(Path(folder) / f'{KICK_NAME}{p.lower()}.tfs') for p in PLANES]
     )
 
 

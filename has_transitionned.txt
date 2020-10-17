@@ -7,10 +7,10 @@ TRANSITIONED:
 - optics_measurements
 - scripts
 - tbt
+- tune_analysis
 
 - high-level scripts
 
 NOT TRANSITIONED:
 - plotting
-- tune_analysis
 - utils
