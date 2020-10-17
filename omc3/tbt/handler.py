@@ -108,7 +108,7 @@ def write_lhc_ascii(output_path, tbt_data):
 
     for index in range(tbt_data.nbunches):
         suffix = f"_{tbt_data.bunch_ids[index]}" if tbt_data.nbunches > 1 else ""
-        with open(output_path + suffix, "w") as output_file:
+        with open(str(output_path) + suffix, "w") as output_file:
             _write_header(tbt_data, index, output_file)
             _write_tbt_data(tbt_data, index, output_file)
 
