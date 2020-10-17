@@ -110,5 +110,5 @@ def test_incorrect_paths():
 
 
 @pytest.fixture
-def _tfs_file():
+def _tfs_file() -> tfs.TfsDataFrame:
     return tfs.read_tfs(INPUT_DIR / "test_imbalance.tfs", index=merge_kmod_results.NAME)
