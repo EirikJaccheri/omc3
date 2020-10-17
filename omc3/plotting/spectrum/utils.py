@@ -7,7 +7,6 @@ Common functions and sorting functions for the spectrum plotter.
 :module: omc3.plotting.spectrum.utils
 
 """
-import os
 from collections import OrderedDict
 from contextlib import suppress
 from pathlib import Path
@@ -400,18 +399,18 @@ def output_plot(fig_cont: FigureContainer):
         fig.savefig(fig_cont.path)
 
 
-def _get_figure_path(out_dir, filename, figurename):
+def _get_figure_path(out_dir, filename, figurename) -> Path:
     path = _make_output_dir(out_dir, filename)
     if path is not None and figurename is not None:
-        path = os.path.join(path, figurename)
+        path = Path(path) / figurename
     return path
 
 
 def _make_output_dir(out_dir, filename):
     if out_dir is not None:
         if filename is not None:
-            out_dir = os.path.join(out_dir, os.path.splitext(filename)[0])
-        os.makedirs(out_dir, exist_ok=True)
+            out_dir = Path(out_dir) / Path(filename).stem
+        Path(out_dir).mkdir(exist_ok=True)
     return out_dir
 
 

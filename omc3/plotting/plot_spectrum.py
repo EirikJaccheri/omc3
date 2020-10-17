@@ -101,8 +101,8 @@ one figure is used.
   Default: ``[1e-09, 1.0]``
 
 """
-import os
 from collections import OrderedDict
+from pathlib import Path
 from typing import Tuple
 
 import matplotlib
@@ -122,6 +122,7 @@ from omc3.plotting.spectrum.utils import (NCOL_LEGEND, LIN,
                                           load_spectrum_data)
 from omc3.plotting.utils.lines import VERTICAL_LINES_TEXT_LOCATIONS
 from omc3.plotting.spectrum.waterfall import create_waterfall_plots
+from omc3.plotting.utils.lines import VERTICAL_LINES_TEXT_LOCATIONS
 from omc3.utils import logging_tools
 
 LOG = logging_tools.getLogger(__name__)
@@ -336,8 +337,8 @@ def _sort_opt(opt):
 # Output ---
 
 def _save_options_to_config(opt):
-    os.makedirs(opt.output_dir, exist_ok=True)
-    save_options_to_config(os.path.join(opt.output_dir, formats.get_config_filename(__file__)),
+    Path(opt.output_dir).mkdir(exist_ok=True)
+    save_options_to_config(Path(opt.output_dir) / formats.get_config_filename(__file__),
                            OrderedDict(sorted(opt.items()))
                            )
 

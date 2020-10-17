@@ -68,9 +68,8 @@ def copy_content_of_dir(src_dir, dst_dir) -> None:
         copy_item(element, destination)
 
 
-def create_dirs(directory) -> None:
-    """ Creates all dirs to directory if not exists. """
-    directory = Path(directory)
+def create_dirs(path_to_dir) -> None:
+    directory = Path(path_to_dir)
     if not directory.exists():
         directory.mkdir()
         LOG.debug(f"Created directory at: '{directory}'")
