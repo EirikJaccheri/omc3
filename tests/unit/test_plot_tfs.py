@@ -1,20 +1,20 @@
-import inspect
-import shutil
-import tempfile
-from contextlib import contextmanager
 from pathlib import Path
 
+import matplotlib
 import pytest
 
 from omc3.plotting.plot_tfs import plot
 
 INPUT = Path(__file__).parent.parent / "inputs" / "optics_measurement" / "example_output"
 DEBUG = False  # switch to local output instead of temp
-
+# Forcing non-interactive Agg backend so rendering is done similarly across platforms during tests
+matplotlib.use("Agg")
 
 # Basic Tests are tested with plot_optics_measurements
 
 # Usage Examples ---
+
+
 @pytest.mark.extended
 def test_simple_plot_manual_planes_same_file(tmp_path):
     figs = plot(
