@@ -7,8 +7,8 @@ Beta from phase
 
 Computes betas and alphas from phase advances.
 """
-import os
 import re
+from pathlib import Path
 
 import numpy as np
 import pandas as pd
@@ -64,7 +64,7 @@ def calculate(meas_input, tunes, phase_dict, header_dict, plane):
 
 
 def write(beta_df, header, outputdir, plane):
-    tfs.write(os.path.join(outputdir, f"{BETA_NAME}{plane.lower()}{EXT}"), beta_df,
+    tfs.write(Path(outputdir) / f"{BETA_NAME}{plane.lower()}{EXT}", beta_df,
               header, save_index="NAME")
 
 

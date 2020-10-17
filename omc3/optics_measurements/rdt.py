@@ -5,7 +5,7 @@ RDTs
 Computes global resonance driving terms f_jklm.
 """
 from copy import deepcopy
-from os.path import join
+from pathlib import Path
 
 import numpy as np
 import pandas as pd
@@ -73,9 +73,9 @@ def calculate(measure_input, input_files, tunes, invariants, header):
 
 
 def write(df, header, meas_input, plane, rdt):
-    outputdir = join(meas_input.outputdir, "rdt", _rdt_to_order_and_type(rdt))
+    outputdir = Path(meas_input.outputdir) / "rdt" / _rdt_to_order_and_type(rdt)
     iotools.create_dirs(outputdir)
-    tfs.write(join(outputdir, f"f{_rdt_to_str(rdt)}_{plane.lower()}{EXT}"), df, header,
+    tfs.write(outputdir / f"f{_rdt_to_str(rdt)}_{plane.lower()}{EXT}", df, header,
               save_index="NAME")
 
 

@@ -9,10 +9,10 @@ Computes various lattice optics parameters from frequency spectra
 """
 
 import datetime
-import os
 import sys
 from collections import OrderedDict
 from copy import deepcopy
+from pathlib import Path
 
 import numpy as np
 import pandas as pd
@@ -42,8 +42,7 @@ def measure_optics(input_files, measure_input):
     """
     LOGGER.info(f"Calculating optics parameters - code version {VERSION}")
     iotools.create_dirs(measure_input.outputdir)
-    logging_tools.add_module_handler(logging_tools.file_handler(
-        os.path.join(measure_input.outputdir, LOG_FILE)))
+    logging_tools.add_module_handler(logging_tools.file_handler(Path(measure_input.outputdir) / LOG_FILE))
     tune_dict = tune.calculate(measure_input, input_files)
     common_header = _get_header(measure_input, tune_dict)
     invariants = {}
@@ -66,10 +65,10 @@ def measure_optics(input_files, measure_input):
             dispersion.calculate_normalised_dispersion(measure_input, input_files, beta_df, common_header)
     # coupling.calculate_coupling(measure_input, input_files, phase_dict, tune_dict, common_header)
     if 'rdt' in measure_input.nonlinear:
-        iotools.create_dirs(os.path.join(measure_input.outputdir, "rdt"))
+        iotools.create_dirs(Path(measure_input.outputdir) / "rdt")
         rdt.calculate(measure_input, input_files, tune_dict, invariants, common_header)
     if 'crdt' in measure_input.nonlinear:
-        iotools.create_dirs(os.path.join(measure_input.outputdir, "crdt"))
+        iotools.create_dirs(Path(measure_input.outputdir) / "crdt")
         crdt.calculate(measure_input, input_files, invariants, common_header)
     if measure_input.chromatic_beating:
         chromatic_beating(input_files, measure_input, tune_dict)
@@ -97,14 +96,14 @@ def chromatic_beating(input_files, measure_input, tune_dict):
             beta_df, _ = beta_from_phase.calculate(dpp_meas_input, tune_dict, phase_dict, OrderedDict(), plane)
             betas.append(beta_df)
         output_df = chromatic.calculate_w_and_phi(betas, dpps, input_files, measure_input, plane)
-        tfs.write(os.path.join(measure_input.outputdir, f"{CHROM_BETA_NAME}{plane.lower()}{EXT}"), output_df, {}, save_index="NAME")
+        tfs.write(Path(measure_input.outputdir) / f"{CHROM_BETA_NAME}{plane.lower()}{EXT}", output_df, {}, save_index="NAME")
 
 
 def _get_header(meas_input, tune_dict):
     compensation = {'model': "by model", 'equation': "by equation", 'none': "None"}
     return OrderedDict([('Measure_optics:version', VERSION),
                         ('Command', f"{sys.executable} {' '.join(sys.argv)}"),
-                        ('CWD', os.getcwd()),
+                        ('CWD', Path.cwd()),
                         ('Date', datetime.datetime.today().strftime("%d. %B %Y, %H:%M:%S")),
                         ('Model_directory', meas_input.accelerator.model_dir),
                         ('Compensation', compensation[meas_input.compensation]),
@@ -259,6 +258,6 @@ def copy_calibration_files(outputdir, calibrationdir):
     calibs = {}
     for plane in PLANES:
         cal_file = f"calibration_{plane.lower()}.out"
-        iotools.copy_item(os.path.join(calibrationdir, cal_file), os.path.join(outputdir, cal_file))
-        calibs[plane] = tfs.read(os.path.join(outputdir, cal_file)).set_index("NAME")
+        iotools.copy_item(Path(calibrationdir) / cal_file, Path(outputdir) / cal_file)
+        calibs[plane] = tfs.read(Path(outputdir) / cal_file, index="NAME")
     return calibs

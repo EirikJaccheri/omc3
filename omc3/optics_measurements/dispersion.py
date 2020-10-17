@@ -7,7 +7,7 @@ Dispersion
 
 Computes orbit, dispersion and normalised dispersion.
 """
-from os.path import join
+from pathlib import Path
 
 import numpy as np
 import pandas as pd
@@ -37,7 +37,8 @@ def calculate_orbit(meas_input, input_files, header, plane):
     df_orbit[f"{ERR}{plane}"] = stats.weighted_error(input_files.get_data(df_orbit, 'CO'), axis=1)
     df_orbit = _get_delta_columns(df_orbit, plane)
     output_df = df_orbit.loc[:, _get_output_columns(plane, df_orbit)]
-    tfs.write(join(meas_input.outputdir, f"{ORBIT_NAME}{plane.lower()}{EXT}"), output_df, header, save_index='NAME')
+    tfs.write(Path(meas_input.outputdir) / f"{ORBIT_NAME}{plane.lower()}{EXT}", output_df, header,
+              save_index='NAME')
     return output_df
 
 
@@ -96,7 +97,8 @@ def _calculate_dispersion_2d(meas_input, input_files, header, plane):
                                            df_orbit.loc[:, [f"D{plane}", f"{ERR}D{plane}"]], plane)
     df_orbit = _get_delta_columns(df_orbit, plane)
     output_df = df_orbit.loc[:, _get_output_columns(plane, df_orbit)]
-    tfs.write(join(meas_input.outputdir, f"{DISPERSION_NAME}{plane.lower()}{EXT}"), output_df, header, save_index='NAME')
+    tfs.write(Path(meas_input.outputdir) / f"{DISPERSION_NAME}{plane.lower()}{EXT}", output_df,
+              header, save_index='NAME')
     return output_df
 
 
@@ -116,7 +118,8 @@ def _calculate_dispersion_3d(meas_input, input_files, header_dict, plane):
     df_orbit[f"DP{plane}"] = _calculate_dp(model, df_orbit.loc[:, [f"D{plane}", f"{ERR}D{plane}"]], plane)
     df_orbit = _get_delta_columns(df_orbit, plane)
     output_df = df_orbit.loc[:, _get_output_columns(plane, df_orbit)]
-    tfs.write(join(output, f"{DISPERSION_NAME}{plane.lower()}{EXT}"), output_df, header_dict, save_index='NAME')
+    tfs.write(Path(output) / f"{DISPERSION_NAME}{plane.lower()}{EXT}", output_df, header_dict,
+              save_index='NAME')
     return output_df
 
 
@@ -152,7 +155,8 @@ def _calculate_normalised_dispersion_2d(meas_input, input_files, beta, header):
     df_orbit[f"{ERR}ND{plane}"] = global_factor * df_orbit.loc[:, 'STDNDX_unscaled']
     df_orbit = _calculate_from_norm_disp(df_orbit, model, plane)
     output_df = df_orbit.loc[:, _get_output_columns(plane, df_orbit)]
-    tfs.write(join(meas_input.outputdir, f"{NORM_DISP_NAME}{plane.lower()}{EXT}"), output_df, header, save_index='NAME')
+    tfs.write(Path(meas_input.outputdir) / f"{NORM_DISP_NAME}{plane.lower()}{EXT}", output_df,
+              header, save_index='NAME')
     return output_df
 
 
@@ -177,7 +181,8 @@ def _calculate_normalised_dispersion_3d(meas_input, input_files, beta, header):
         input_files, df_orbit, scaled_amps, mask)
     df_orbit = _calculate_from_norm_disp(df_orbit, model, plane)
     output_df = df_orbit.loc[:, _get_output_columns(plane, df_orbit)]
-    tfs.write(join(output, f"{NORM_DISP_NAME}{plane.lower()}{EXT}"), output_df, header, save_index='NAME')
+    tfs.write(Path(output) / f"{NORM_DISP_NAME}{plane.lower()}{EXT}", output_df, header,
+              save_index='NAME')
     return output_df
 
 

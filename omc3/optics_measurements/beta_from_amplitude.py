@@ -7,14 +7,13 @@ Beta from amplitude
 
 Computes beta from amplitude.
 """
-from os.path import join
+from pathlib import Path
 
 import numpy as np
 import pandas as pd
 import tfs
 
-from omc3.optics_measurements.constants import (AMP_BETA_NAME, DELTA, ERR, EXT,
-                                                MDL, RES)
+from omc3.optics_measurements.constants import AMP_BETA_NAME, DELTA, ERR, EXT, MDL, RES
 from omc3.optics_measurements.toolbox import df_ratio, df_rel_diff
 
 
@@ -39,7 +38,7 @@ def calculate(meas_input, input_files, tune_dict, beta_phase, header_dict, plane
     x_ratio = phase_to_amp_ratio(meas_input, beta_phase, beta_amp, plane)
     beta_amp = add_rescaled_beta_columns(beta_amp, x_ratio, plane)
     header_d = _get_header(header_dict, np.std(beta_amp.loc[:, f"{DELTA}BET{plane}"].values), x_ratio)
-    tfs.write(join(meas_input.outputdir, f"{AMP_BETA_NAME}{plane.lower()}{EXT}"), beta_amp, header_d, save_index='NAME')
+    tfs.write(Path(meas_input.outputdir) / f"{AMP_BETA_NAME}{plane.lower()}{EXT}", beta_amp, header_d, save_index='NAME')
     return x_ratio
 
 

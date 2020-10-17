@@ -7,7 +7,7 @@ IP
 
 Computes beta* from phase.
 """
-from os.path import join
+from pathlib import Path
 
 import numpy as np
 import pandas as pd
@@ -53,7 +53,7 @@ def betastar_from_phase(meas_input, phase_d):
 
 def write(ips_d, headers, output_dir, plane):
     if ips_d is not None:
-        tfs.write(join(output_dir, f"{IP_NAME}{plane.lower()}{EXT}"), ips_d, headers_dict=headers,)
+        tfs.write(Path(output_dir) / f"{IP_NAME}{plane.lower()}{EXT}", ips_d, headers_dict=headers)
 
 
 def phase_to_betastar(lstar, phase, errphase):

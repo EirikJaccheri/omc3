@@ -4,11 +4,11 @@ TRANSITIONED:
 - model
 - harpy
 - kmod
+- optics_measurements
 
 - high-level scripts
 
 NOT TRANSITIONED:
-- optics_measurements
 - plotting
 - scripts
 - tbt

@@ -7,7 +7,8 @@ Phase advance
 
 Computes betatron phase advances and provides structures to store them.
 """
-from os.path import join
+from pathlib import Path
+
 import numpy as np
 import pandas as pd
 import tfs
@@ -127,7 +128,7 @@ def _compensate_by_model(input_files, meas_input, df, plane):
 
 def write(dfs, headers, output, plane):
     for head, df, name in zip(headers, dfs, (PHASE_NAME, TOTAL_PHASE_NAME)):
-        tfs.write(join(output, f"{name}{plane.lower()}{EXT}"), df, head)
+        tfs.write(Path(output) / f"{name}{plane.lower()}{EXT}", df, head)
         LOGGER.info(f"Phase advance beating in {name}{plane.lower()}{EXT} = "
                     f"{stats.weighted_rms(df.loc[:, f'{DELTA}PHASE{plane}'])}")
 
@@ -209,8 +210,9 @@ def write_special(meas_input, phase_advances, plane_tune, plane):
                                                             elems_to_bpms,
         ])), ignore_index=True)
 
-    tfs.write(join(meas_input.outputdir, f"{SPECIAL_PHASE_NAME}{plane.lower()}{EXT}"), special_phase_df)
-    
+    tfs.write(Path(meas_input.outputdir) / f"{SPECIAL_PHASE_NAME}{plane.lower()}{EXT}", special_phase_df)
+
+
 def _to_deg(phase):  # -90 to 90 degrees
     phase = phase % 0.5 * 360
     if phase < 90:
