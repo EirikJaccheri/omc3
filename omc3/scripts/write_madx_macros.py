@@ -17,17 +17,20 @@ Write out madx scripts for the tracking macros.
     Path to twissfile with observationspoint in the NAME column.
 
 """
-import os
+from pathlib import Path
+from typing import List
+
 import tfs
+from generic_parser.entrypoint_parser import EntryPointParameters, entrypoint
+
 from omc3.model.constants import MACROS_DIR, OBS_POINTS
-from generic_parser.entrypoint_parser import entrypoint, EntryPointParameters
 
 
-def _call(path_to_call):
-    return f"call, file = '{path_to_call}';\n"
+def _call(path_to_call: Path) -> str:
+    return f"call, file = '{path_to_call.absolute()}';\n"
 
 
-def define_observation_points_macros(list_of_bpms):
+def define_observation_points_macros(list_of_bpms: List[str]) -> str:
     macro = ""
     for tracker, prefix in (("ptc", "ptc_"), ("madx", "")):
         macro += f"define_{tracker}_observation_points(): macro = {{\n"
@@ -36,10 +39,9 @@ def define_observation_points_macros(list_of_bpms):
     return macro
 
 
-def tracking_macros(list_of_bpms, outdir):
-    obs_macro_file = os.path.join(outdir, MACROS_DIR, OBS_POINTS)
-    with open(obs_macro_file, 'w') as obs_script:
-        obs_script.write(define_observation_points_macros(list_of_bpms))
+def tracking_macros(list_of_bpms: List[str], outdir) -> str:
+    obs_macro_file = Path(outdir) / MACROS_DIR / OBS_POINTS
+    obs_macro_file.write_text(define_observation_points_macros(list_of_bpms))
     track_macros = _call(obs_macro_file)
     track_macros += """
     /*

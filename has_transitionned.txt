@@ -5,12 +5,12 @@ TRANSITIONED:
 - harpy
 - kmod
 - optics_measurements
+- scripts
 
 - high-level scripts
 
 NOT TRANSITIONED:
 - plotting
-- scripts
 - tbt
 - tune_analysis
 - utils
