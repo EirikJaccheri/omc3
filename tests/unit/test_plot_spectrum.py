@@ -88,36 +88,30 @@ def test_no_tunes_in_files_plot(tmp_path, file_path, bpms):
         fname = file_path.with_suffix(f"{file_path.suffix}.lin{p.lower()}")
         df = tfs.read(fname)
         tfs.write(fname, df.drop(columns=[f"TUNE{p.upper()}", f"NATTUNE{p.upper()}"]))
-    plot_spectrum(
-        files=[file_path], bpms=bpms, combine_by=["files", "bpms"],
-    )
+    plot_spectrum(files=[file_path], bpms=bpms, combine_by=["files", "bpms"])
 
 
 @pytest.mark.basic
 def test_crash_too_low_amplimit(tmp_path):
     with pytest.raises(ValueError):
-        plot_spectrum(
-            files=["test"], output_dir=str(tmp_path), amp_limit=-1.0,
-        )
+        plot_spectrum(files=["test"], output_dir=str(tmp_path), amp_limit=-1.0)
 
 
 @pytest.mark.basic
 def test_crash_file_not_found_amplimit(tmp_path):
     with pytest.raises(FileNotFoundError):
-        plot_spectrum(
-            files=["test"], output_dir=str(tmp_path),
-        )
+        plot_spectrum(files=["test"], output_dir=str(tmp_path))
 
 
-def _get_output_dir(tmp_path, file_path):
+def _get_output_dir(tmp_path, file_path) -> Path:
     return tmp_path / file_path.with_suffix("").name
 
 
 @pytest.fixture
-def file_path():
+def file_path() -> Path:
     return INPUT_DIR / "spec_test.sdds"
 
 
 @pytest.fixture
-def bpms():
+def bpms() -> list:
     return ["BPM.10L1.B1", "BPM.10L2.B1"]
