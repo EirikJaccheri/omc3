@@ -7,6 +7,7 @@ Basic tbt io-functionality.
 
 """
 from datetime import datetime
+from pathlib import Path
 
 import numpy as np
 import pandas as pd
@@ -68,7 +69,7 @@ def read_tbt(file_path):
     return handler.TbtData(matrices, date, bunch_ids, nturns)
 
 
-def _is_ascii_file(file_path):
+def _is_ascii_file(file_path) -> bool:
     """
     Returns true only if the file looks like a readable tbt ASCII file.
     """
@@ -85,7 +86,7 @@ def _is_ascii_file(file_path):
 
 def _read_ascii(file_path):
     """ Read the ascii file. """
-    with open(file_path, "r") as file_data:
+    with Path(file_path).open("r") as file_data:
         data_lines = file_data.readlines()
 
     bpm_names = {"X": [], "Y": []}

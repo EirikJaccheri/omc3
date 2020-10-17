@@ -6,11 +6,11 @@ TRANSITIONED:
 - kmod
 - optics_measurements
 - scripts
+- tbt
 
 - high-level scripts
 
 NOT TRANSITIONED:
 - plotting
-- tbt
 - tune_analysis
 - utils

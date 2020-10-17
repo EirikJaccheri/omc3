@@ -22,10 +22,9 @@ DATA_READERS = dict(lhc=reader_lhc,
                     trackone=reader_trackone)
 
 
-class TbtData(object):
+class TbtData:
     """
     Object holding a representation of a Turn-by-Turn Data
-
     """
     def __init__(self, matrices, date, bunch_ids, nturns):
         self.matrices = matrices  # list per bunch containing dict per plane of DataFrames
