@@ -78,17 +78,17 @@ def test_two_important_number(some_numbers):
 # Utilities ###################################################################
 
 @pytest.fixture
-def zeros():
+def zeros() -> np.ndarray:
     return np.zeros(10)
 
 
 @pytest.fixture
-def a_nan():
+def a_nan() -> np.ndarray:
     a_nan = np.zeros(10)
     a_nan[3] = np.nan
     return a_nan
 
 
 @pytest.fixture
-def some_numbers():
+def some_numbers() -> np.ndarray:
     return np.arange(10)
