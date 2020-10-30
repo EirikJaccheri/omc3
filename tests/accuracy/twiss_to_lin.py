@@ -10,9 +10,8 @@ This module generates the .linx/y (both on-momentum and off-momentum) from two t
 for free motion and for driven motion. The twisses should contain the chromatic functions as well.
 
 """
-from collections import OrderedDict
 from datetime import datetime
-from os.path import join
+from pathlib import Path
 
 import numpy as np
 import pandas as pd
@@ -92,8 +91,8 @@ def generate_lin_files(model, tune, nattune, motion='_d', dpp=0.0, beam_directio
 
 
 def get_combined_model_and_tunes(model_dir):
-    free = tfs.read(join(model_dir, 'twiss.dat'))
-    driven = tfs.read(join(model_dir, 'twiss_ac.dat'))
+    free = tfs.read(Path(model_dir) / 'twiss.dat')
+    driven = tfs.read(Path(model_dir) / 'twiss_ac.dat')
     nattune = {"X": np.remainder(free.headers['Q1'], 1), "Y": np.remainder(free.headers['Q2'], 1)}
     tune = {"X": np.remainder(driven.headers['Q1'], 1), "Y": np.remainder(driven.headers['Q2'], 1)}
     model = pd.merge(free, driven, how='inner', on='NAME', suffixes=MOTION.values())
@@ -101,11 +100,17 @@ def get_combined_model_and_tunes(model_dir):
     return model, tune, nattune
 
 
-def _get_header(tunes, nattunes, plane):
-    header = OrderedDict()
-    header[f"Q{PLANE_TO_NUM[plane]}"] = tunes[plane]
-    header[f"Q{PLANE_TO_NUM[plane]}RMS"] = 1e-7
-    header[f"NATQ{PLANE_TO_NUM[plane]}"] = nattunes[plane]
-    header[f"NATQ{PLANE_TO_NUM[plane]}RMS"] = 1e-6
-    header["TIME"] = datetime.utcnow().strftime(formats.TIME)
+def _get_header(tunes, nattunes, plane) -> dict:
+    header = {
+        f"Q{PLANE_TO_NUM[plane]}": tunes[plane],
+        f"Q{PLANE_TO_NUM[plane]}RMS": 1e-7,
+        f"NATQ{PLANE_TO_NUM[plane]}": nattunes[plane],
+        f"NATQ{PLANE_TO_NUM[plane]}RMS": 1e-6,
+        "TIME": datetime.utcnow().strftime(formats.TIME)
+    }
+    # header[f"Q{PLANE_TO_NUM[plane]}"] = tunes[plane]
+    # header[f"Q{PLANE_TO_NUM[plane]}RMS"] = 1e-7
+    # header[f"NATQ{PLANE_TO_NUM[plane]}"] = nattunes[plane]
+    # header[f"NATQ{PLANE_TO_NUM[plane]}RMS"] = 1e-6
+    # header["TIME"] = datetime.utcnow().strftime(formats.TIME)
     return header
