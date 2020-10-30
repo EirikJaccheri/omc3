@@ -12,7 +12,7 @@ E = \033[0m
 P = \033[95m
 R = \033[31m
 
-.PHONY : help archive clean install tests
+.PHONY : help archive clean docs install tests
 
 all: install
 
@@ -41,6 +41,8 @@ clean:
 	@rm -rf dist
 	@rm -rf .eggs
 	@rm -rf omc3.egg-info
+	@echo "Cleaning up documentation builds"
+	@rm -rf doc_build
 	@echo "Cleaning up bitecode files and python cache."
 	@find . -type f -name '*.py[co]' -delete -o -type d -name __pycache__ -delete
 	@echo "Cleaning up pytest cache."
@@ -48,6 +50,10 @@ clean:
 	@echo "Cleaning up coverage reports."
 	@find . -type f -name '.coverage' -exec rm -rf {} + -o -type f -name 'coverage.xml' -delete
 	@echo "All cleaned up!\n"
+
+docs:
+	@echo "$(B)Building documentation and outputing to $(C)doc_build$(E)"
+	@python -m sphinx -b html doc ./doc_build -d ./doc_build
 
 install: clean
 	@echo "$(B)Installing this package to your active environment.$(E)"
