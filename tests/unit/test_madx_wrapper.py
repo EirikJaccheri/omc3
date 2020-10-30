@@ -20,7 +20,7 @@ def test_with_macro(tmp_path):
     outfile = tmp_path / "job.with_macro.madx"
 
     with silence():
-        madx_wrapper.run_string(content, output_file=outfile)
+        madx_wrapper.run_string(content, output_file=outfile, cwd=str(tmp_path))
     assert outfile.exists()
     out_lines = outfile.read_text()
     assert out_lines == content
