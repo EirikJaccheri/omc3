@@ -5,7 +5,8 @@ import tfs
 from omc3.hole_in_one import hole_in_one_entrypoint
 from omc3.optics_measurements import crdt
 
-# accuracy limits of crdt to ptc, octupole is relaxed as single octupole with a nonideal WP gives weak CRDT
+# accuracy limits of crdt to ptc, octupole is relaxed as a single octupole with a nonideal WP
+# gives weak CRDT
 ACCURACY_LIMIT = dict(
     coupling=0.01,
     sextupole=0.01,
@@ -72,8 +73,9 @@ def test_crdt_amp(order, _create_input):
 
     for crdt_dict in crdt.CRDTS:
         if order == crdt_dict["order"]:
-            hio_crdt = tfs.read(optics_opt["outputdir"] / "crdt" / order /  f'{crdt_dict["term"]}.tfs',
-                                index="NAME")
+            hio_crdt = tfs.read(
+                optics_opt["outputdir"] / "crdt" / order / f'{crdt_dict["term"]}.tfs', index="NAME"
+            )
             assert _max_dev(hio_crdt["AMP"].to_numpy(),
                             ptc_crdt[f"{crdt_dict['term']}_ABS"].to_numpy(),
                             NOISELEVEL_AMP[order]) < ACCURACY_LIMIT[order]
@@ -88,8 +90,9 @@ def test_crdt_complex(order, _create_input):
 
     for crdt_dict in crdt.CRDTS:
         if order == crdt_dict["order"]:
-            hio_crdt = tfs.read(optics_opt["outputdir"] / "crdt" /  order / f'{crdt_dict["term"]}.tfs',
-                                index="NAME")
+            hio_crdt = tfs.read(
+                optics_opt["outputdir"] / "crdt" / order / f'{crdt_dict["term"]}.tfs', index="NAME"
+            )
 
             assert _max_dev(hio_crdt["REAL"].to_numpy(),
                             ptc_crdt[f"{crdt_dict['term']}_REAL"].to_numpy(),
@@ -98,6 +101,9 @@ def test_crdt_complex(order, _create_input):
             assert _max_dev(hio_crdt["IMAG"].to_numpy(),
                             ptc_crdt[f"{crdt_dict['term']}_IMAG"].to_numpy(),
                             NOISELEVEL_COMPLEX[order]) < ACCURACY_LIMIT[order]
+
+
+# ----- helpers ----- #
 
 
 def _rel_dev(a, b, limit):
