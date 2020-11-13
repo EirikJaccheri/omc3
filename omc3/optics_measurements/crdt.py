@@ -1,12 +1,13 @@
 """
-Combined RDTs
--------------
+CRDTs
+-------------------
 
-This module contains combined resonance driving terms calculations functionality of
-``optics_measurements``.
-It provides functions to compute combined resonance driving terms following the derivations in
-https://arxiv.org/pdf/1402.1461.pdf.
+:module: optics_measurements.crdt
+
+Computes combined resonance driving terms
+following the derivations in https://arxiv.org/pdf/1402.1461.pdf.
 """
+
 from pathlib import Path
 import numpy as np
 import pandas as pd
@@ -80,8 +81,8 @@ def calculate(measure_input, input_files, invariants, header):
                              (nqx * input_files.get_data(result_df, "ERRMUX"))**2 +
                              (nqy * input_files.get_data(result_df, "ERRMUY"))**2)
 
-        result_df[PHASE] = circular_nanmean(phases, axis=1, errors=err_phases)
-        result_df[f'{ERR}{PHASE}'] = circular_nanerror(phases, axis=1, errors=err_phases)
+        result_df[PHASE] = circular_nanmean(phases, axis=1, errors=err_phases, period=1)
+        result_df[f'{ERR}{PHASE}'] = circular_nanerror(phases, axis=1, errors=err_phases, period=1)
 
         result_df[REAL] = np.cos(PI2 * result_df[PHASE].to_numpy()) * result_df[AMPLITUDE].to_numpy()
         result_df[IMAG] = np.sin(PI2 * result_df[PHASE].to_numpy()) * result_df[AMPLITUDE].to_numpy()
